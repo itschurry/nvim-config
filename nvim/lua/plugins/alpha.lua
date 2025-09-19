@@ -4,26 +4,16 @@ local alpha = require("alpha")
 local dashboard = require("alpha.themes.dashboard")
 
 dashboard.section.header.val = {
-    "                                                      ", 
-    "                                                      ", 
-    "             A New Family for Farmers.                ",
-    " We are creating the intelligent agricultural robot,  ",
-    "                                                      ", 
-    "                                                      ", 
-    "                                                      ", 
+  "                                                      ",
+  "                  Code. Build. Repeat.                ",
+  "                                                      ",
 }
 dashboard.section.footer.val = {
-    "                                                      ", 
-    "                                                      ", 
-    "                                                      ", 
-    "                                                      ", 
-    " ███████╗ █████╗ ██████╗ ███╗   ███╗██╗██╗  ██╗   ██╗ ",
-    " ██╔════╝██╔══██╗██╔══██╗████╗ ████║██║██║  ╚██╗ ██╔╝ ",
-    " █████╗  ███████║██████╔╝██╔████╔██║██║██║   ╚████╔╝  ",
-    " ██╔══╝  ██╔══██║██╔══██╗██║╚██╔╝██║██║██║    ╚██╔╝   ",
-    " ██║     ██║  ██║██║  ██║██║ ╚═╝ ██║██║███████╗██║    ",
-    " ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚═╝╚══════╝╚═╝    ",
-    "                                                      ",
+  "                                                      ",
+  "                  ┌─────────────────┐                 ",
+  "                  │    ROBOTICS     │                 ",
+  "                  └─────────────────┘                 ",
+  "                                                      ",
 }
 
 -- 메뉴 버튼 설정

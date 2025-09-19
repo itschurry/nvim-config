@@ -1,41 +1,31 @@
+-- mason은 "설치"만 맡기고, 설정/활성화는 core API로
 local mason = require("mason")
-local mlsp = require("mason-lspconfig")
-local lspconfig = require("lspconfig")
-
+local mlsp  = require("mason-lspconfig")
 mason.setup()
--- mlsp.setup {
---   ensure_installed = { 
---         "clangd", "pyright", "dockerls", "jsonls", "yamlls", "bashls",
---     },
--- }
---
--- 공통 on_attach
-local function on_attach(_, bufnr)
-  vim.diagnostic.config({
-    virtual_text = false,
-    signs = true,
-    underline = true,
-    severity_sort = true,
-  }, bufnr)
+mlsp.setup { ensure_installed = { "clangd", "pyright", "dockerls", "jsonls", "yamlls", "bashls" } }
+
+-- 진단 표시 취향 유지
+vim.diagnostic.config({
+  virtual_text = false,
+  signs = true,
+  underline = true,
+  severity_sort = true,
+})
+
+-- on_attach: 키맵은 최신 방식으로
+local function on_attach(client, bufnr)
+  local map = function(mode, lhs, rhs) vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, silent = true }) end
+  map('n', 'gd', vim.lsp.buf.definition)
+  map('n', 'K',  vim.lsp.buf.hover)
+  map('n', '<leader>f', function() vim.lsp.buf.format({ async = true }) end)
 end
 
--- 공통 LSP 설정
-local on_attach = function(client, bufnr)
-  local opts = { noremap = true, silent = true }
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gd', '<Cmd>lua vim.lsp.buf.definition()<CR>', opts)
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'K', '<Cmd>lua vim.lsp.buf.hover()<CR>', opts)
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gf', '<Cmd>lua vim.lsp.buf.references()<CR>', opts)
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>rn', '<Cmd>lua vim.lsp.buf.rename()<CR>', opts)
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>ca', '<Cmd>lua vim.lsp.buf.code_action()<CR>', opts)
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>f', '<Cmd>lua vim.lsp.buf.format({ async = true })<CR>', opts)
-end
-
+-- cmp-nvim-lsp capabilities 그대로
 local capabilities = require("cmp_nvim_lsp").default_capabilities()
 capabilities.offsetEncoding = { "utf-16" }
 
-lspconfig.clangd.setup({
-  on_attach = on_attach,
-  capabilities = capabilities,
+-- ⬇️ 핵심: 새 API로 clangd 구성
+vim.lsp.config('clangd', {
   cmd = {
     "clangd",
     "--background-index",
@@ -45,28 +35,13 @@ lspconfig.clangd.setup({
     "--j=6",
     "--log=error",
     "--limit-results=30",
-    "--compile-commands-dir=" .. vim.fn.expand("~/farmily_ws/build"),
+    "--compile-commands-dir=" .. vim.fn.getcwd() .. "/build"
   },
-  -- cmd = {
-  --   "clangd",
-  --   "--background-index",
-  --   "--all-scopes-completion",
-  --   "--clang-tidy",
-  --   "--header-insertion-decorators",
-  --   "--suggest-missing-includes",
-  --   "--completion-style=detailed",
-  --   "--pch-storage=memory",
-  --   "--limit-results=30",
-  --   "--j=6",
-  --   "--log=error",
-  --   "--header-insertion=never",
-  --   "--clang-tidy-checks=-*,modernize-deprecated-headers,llvm-include-order,readability-*",
-  --   "--compile-commands-dir=" .. vim.fn.expand("/home/rdv/catkin_ws/build") 
-  -- },
-  root_dir = lspconfig.util.root_pattern("compile_commands.json", ".git"),
+  on_attach = on_attach,
+  capabilities = capabilities,
+  root_markers = { "compile_commands.json", ".git" },
+  filetypes = { "c", "cpp", "objc", "objcpp" },
 })
 
--- 나머지 서버는 default
-for _, server in ipairs({ "pyright", "bashls", "jsonls", "yamlls" }) do
-  lspconfig[server].setup { on_attach = on_attach, capabilities = capabilities }
-end
+-- 활성화
+vim.lsp.enable('clangd')
