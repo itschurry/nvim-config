@@ -23,11 +23,11 @@ map("n", "<leader>gl", "<cmd>Telescope diagnostics<CR>", {
 
 
 -- buffer 
-vim.keymap.set("n", "<leader>z",  ":BufferLineCyclePrev<CR>",  { silent = true })
-vim.keymap.set("n", "<leader>x",  ":BufferLineCycleNext<CR>",  { silent = true })
-vim.keymap.set("n", "<leader>d",  ":bdelete<CR>",              { silent = true })
-vim.keymap.set("n", "<leader>p",  ":BufferLinePick<CR>",       { silent = true })
-vim.keymap.set("n", "<leader>pd", ":BufferLinePickClose<CR>",  { silent = true })
+map("n", "<leader>z",  ":BufferLineCyclePrev<CR>",  { silent = true })
+map("n", "<leader>x",  ":BufferLineCycleNext<CR>",  { silent = true })
+map("n", "<leader>d",  ":bdelete<CR>",              { silent = true })
+map("n", "<leader>p",  ":BufferLinePick<CR>",       { silent = true })
+map("n", "<leader>pd", ":BufferLinePickClose<CR>",  { silent = true })
 
 local function move_buf_to_split(dir)
   local bufnr = vim.api.nvim_get_current_buf()
@@ -64,22 +64,22 @@ local function move_buf_to_split(dir)
 
 end
 -- 키맵 등록
-vim.keymap.set("n", "<leader>h", function() move_buf_to_split("h") end, { desc = "Move buffer left", silent = true })
-vim.keymap.set("n", "<leader>j", function() move_buf_to_split("j") end, { desc = "Move buffer down", silent = true })
-vim.keymap.set("n", "<leader>k", function() move_buf_to_split("k") end, { desc = "Move buffer up", silent = true })
-vim.keymap.set("n", "<leader>l", function() move_buf_to_split("l") end, { desc = "Move buffer right", silent = true })
+map("n", "<leader>h", function() move_buf_to_split("h") end, { desc = "Move buffer left", silent = true })
+map("n", "<leader>j", function() move_buf_to_split("j") end, { desc = "Move buffer down", silent = true })
+map("n", "<leader>k", function() move_buf_to_split("k") end, { desc = "Move buffer up", silent = true })
+map("n", "<leader>l", function() move_buf_to_split("l") end, { desc = "Move buffer right", silent = true })
 
 -- ✅ Ctrl + Space → Linewise toggle
-vim.keymap.set("n", "<leader>/", require("Comment.api").toggle.linewise.current, { desc = "Toggle line comment" })
-vim.keymap.set("v", "<leader>/", function()
+map("n", "<leader>/", require("Comment.api").toggle.linewise.current, { desc = "Toggle line comment" })
+map("v", "<leader>/", function()
   local esc = vim.api.nvim_replace_termcodes("<ESC>", true, false, true)
   vim.api.nvim_feedkeys(esc, "x", false)
   require("Comment.api").toggle.linewise(vim.fn.visualmode())
 end, { desc = "Visual toggle line comment" })
 
 -- ✅ Alt + / → Blockwise toggle
-vim.keymap.set("n", "<M-/>", require("Comment.api").toggle.blockwise.current, { desc = "Toggle block comment" })
-vim.keymap.set("v", "<M-/>", function()
+map("n", "<M-/>", require("Comment.api").toggle.blockwise.current, { desc = "Toggle block comment" })
+map("v", "<M-/>", function()
   local esc = vim.api.nvim_replace_termcodes("<ESC>", true, false, true)
   vim.api.nvim_feedkeys(esc, "x", false)
   require("Comment.api").toggle.blockwise(vim.fn.visualmode())
@@ -88,3 +88,8 @@ end, { desc = "Visual toggle block comment" })
 vim.keymap.del("n", "gc")
 vim.keymap.del("v", "gc")
 vim.keymap.del("o", "gc")
+
+-- Fold 키 매핑
+map('n', '<leader>zR', 'zR', { noremap = true, silent = true })
+map('n', '<leader>zM', 'zM', { noremap = true, silent = true })
+map('n', '<leader>za', 'za', { noremap = true, silent = true })
