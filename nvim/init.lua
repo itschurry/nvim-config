@@ -22,7 +22,7 @@ else
 
         require("plugins.alpha")
         require("plugins.cmp")
-        require("plugins.copilot")
+        -- require("plugins.copilot")
         require("plugins.dap")
         -- require("plugins.flutter")
         require("plugins.folding")
