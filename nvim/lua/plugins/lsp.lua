@@ -2,7 +2,7 @@
 local mason = require("mason")
 local mlsp  = require("mason-lspconfig")
 mason.setup()
-mlsp.setup { ensure_installed = { "clangd", "pyright", "dockerls", "jsonls", "yamlls", "bashls" } }
+mlsp.setup { ensure_installed = { "clangd", "pyright", "dockerls", "jsonls", "yamlls" } }
 
 -- 진단 표시 취향 유지
 vim.diagnostic.config({
