@@ -2,7 +2,7 @@
 -- NvimTree
 require("nvim-tree").setup {
     view = {
-        width = 80,          -- 탐색기 너비 설정
+        width = 60,          -- 탐색기 너비 설정
         side = "right",       -- 탐색기 위치 (left, right)
     },
     filters = {
