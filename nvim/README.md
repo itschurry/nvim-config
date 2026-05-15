@@ -176,17 +176,6 @@ Leader 키는 `,`다.
 | Normal | `<F11>` | DAP step into |
 | Normal | `<F12>` | DAP step out |
 
-### Copilot
-
-`plugins.integrations.copilot`을 `init.lua`에서 활성화했을 때만 쓴다.
-
-| 모드 | 키 | 동작 |
-| --- | --- | --- |
-| Insert | `<C-j>` | 제안 수락 |
-| Insert | `<C-l>` | 다음 제안 |
-| Insert | `<C-h>` | 이전 제안 |
-| Insert | `<C-e>` | 제안 닫기 |
-
 ### Alpha 대시보드
 
 시작 화면에서만 동작한다.
