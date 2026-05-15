@@ -2,15 +2,15 @@ local map = vim.keymap.set
 vim.g.mapleader = ","
 
 -- 일반
-map("n", "<leader>h", ":nohlsearch<CR>", { silent = true })
+map("n", "<leader>nh", ":nohlsearch<CR>", { silent = true, desc = "Clear search highlight" })
 map("n", "<leader>tn", ":set nonumber norelativenumber<CR>")
 map("n", "<leader>tnr", ":set number relativenumber<CR>")
 map("n", "<leader>u", ":redo<CR>", { silent = true })
 
 -- 클립보드
 map({ "n", "v" }, "<leader>y", '"+y', { silent = true })
-map("n", "<leader>p", '"+p', { silent = true })
-map("n", "<leader>y", ':echo @"<CR>', { silent = true })
+map("n", "<leader>P", '"+p', { silent = true })
+map("n", "<leader>yr", ':echo @"<CR>', { silent = true })
 
 
 -- 경고 표시
@@ -68,26 +68,6 @@ map("n", "<leader>h", function() move_buf_to_split("h") end, { desc = "Move buff
 map("n", "<leader>j", function() move_buf_to_split("j") end, { desc = "Move buffer down", silent = true })
 map("n", "<leader>k", function() move_buf_to_split("k") end, { desc = "Move buffer up", silent = true })
 map("n", "<leader>l", function() move_buf_to_split("l") end, { desc = "Move buffer right", silent = true })
-
--- ✅ Ctrl + Space → Linewise toggle
-map("n", "<leader>/", require("Comment.api").toggle.linewise.current, { desc = "Toggle line comment" })
-map("v", "<leader>/", function()
-  local esc = vim.api.nvim_replace_termcodes("<ESC>", true, false, true)
-  vim.api.nvim_feedkeys(esc, "x", false)
-  require("Comment.api").toggle.linewise(vim.fn.visualmode())
-end, { desc = "Visual toggle line comment" })
-
--- ✅ Alt + / → Blockwise toggle
-map("n", "<M-/>", require("Comment.api").toggle.blockwise.current, { desc = "Toggle block comment" })
-map("v", "<M-/>", function()
-  local esc = vim.api.nvim_replace_termcodes("<ESC>", true, false, true)
-  vim.api.nvim_feedkeys(esc, "x", false)
-  require("Comment.api").toggle.blockwise(vim.fn.visualmode())
-end, { desc = "Visual toggle block comment" })
-
-vim.keymap.del("n", "gc")
-vim.keymap.del("v", "gc")
-vim.keymap.del("o", "gc")
 
 -- Fold 키 매핑
 map('n', '<leader>zR', 'zR', { noremap = true, silent = true })

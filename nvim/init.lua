@@ -7,6 +7,7 @@ else
     require("core.options")
     require("core.keymaps")
     require("core.autocommands")
+    require("core.project")
 
     -- Step 2. 플러그인 설치
     require("plugins")
@@ -17,18 +18,20 @@ else
       local mason_path = vim.fn.stdpath("data") .. "/site/pack/plugins/start/mason.nvim"
       if vim.fn.isdirectory(mason_path) ~= 0 then
         -- require("theme.catppuccin")
-        -- require("theme.tokyonight")
-        require("theme.github")
+        require("theme.tokyonight")
+        -- require("theme.github")
 
-        require("plugins.alpha")
-        require("plugins.cmp")
-        -- require("plugins.copilot")
-        require("plugins.dap")
-        -- require("plugins.flutter")
-        require("plugins.folding")
-        require("plugins.lsp")
-        require("plugins.telescope")
-        require("plugins.treesitter")
+        require("plugins.ui.alpha")
+        require("plugins.completion.cmp")
+        -- require("plugins.integrations.copilot")
+        require("plugins.language.dap")
+        require("plugins.editor.format")
+        -- require("plugins.integrations.flutter")
+        require("plugins.editor.folding")
+        require("plugins.language.lsp")
+        require("plugins.navigation.telescope")
+        require("plugins.editor.treesitter")
+        require("plugins.editor.markdown")
         require("plugins.ui")
 
         -- 유틸 (rsync 단축키 등)

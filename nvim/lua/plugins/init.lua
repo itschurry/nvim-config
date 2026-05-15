@@ -20,7 +20,6 @@ local plugins = {
   { repo = "folke/which-key.nvim" },
   { repo = "folke/zen-mode.nvim" },
   { repo = "folke/twilight.nvim" },
-  { repo = "folke/edgy.nvim" },
   { repo = "folke/noice.nvim" },
   { repo = "rcarriga/nvim-notify" },
   { repo = "goolord/alpha-nvim" },
@@ -29,15 +28,15 @@ local plugins = {
   { repo = "akinsho/bufferline.nvim", name = "bufferline.nvim" },
   { repo = "nvim-lualine/lualine.nvim" },
   { repo = "stevearc/aerial.nvim" },
+  { repo = "MeanderingProgrammer/render-markdown.nvim" },
 
   -- ☆ 탐색 기능
   { repo = "nvim-telescope/telescope.nvim" },
 
   -- ☆ 코드 하이라이트 및 구조
-  { repo = "nvim-treesitter/nvim-treesitter" },
+  { repo = "nvim-treesitter/nvim-treesitter", branch = "main" },
   { repo = "kevinhwang91/nvim-ufo" },
   { repo = "kevinhwang91/promise-async" }, -- 의존성
-  { repo = "L3MON4D3/LuaSnip" },
 
   -- ☆ LSP / 자동완성
   { repo = "neovim/nvim-lspconfig" },
@@ -45,15 +44,17 @@ local plugins = {
   { repo = "williamboman/mason-lspconfig.nvim" },
   { repo = "hrsh7th/nvim-cmp" },
   { repo = "hrsh7th/cmp-nvim-lsp" },
+  { repo = "hrsh7th/cmp-buffer" },
+  { repo = "hrsh7th/cmp-path" },
   { repo = "L3MON4D3/LuaSnip" },
   { repo = "saadparwaiz1/cmp_luasnip" },
   { repo = "windwp/nvim-autopairs" },
+  { repo = "stevearc/conform.nvim" },
   { repo = "nvimtools/none-ls.nvim" },
 
   -- ☆ Git / AI
   { repo = "lewis6991/gitsigns.nvim" },
   { repo = "zbirenbaum/copilot.lua" },
-  { repo = "CopilotC-Nvim/CopilotChat.nvim" },
 
   -- ☆ DAP (Debug Adapter Protocol)
   { repo = "mfussenegger/nvim-dap" },
@@ -72,11 +73,16 @@ for _, plugin in ipairs(plugins) do
   -- 경로가 존재하지 않으면 git clone
   if vim.fn.empty(vim.fn.glob(path)) > 0 then
     print("🔌 Installing " .. plugin.repo)
-    vim.fn.system({
+    local clone_cmd = {
       "git", "clone", "--depth", "1",
       "https://github.com/" .. plugin.repo,
       path
-    })
+    }
+    if plugin.branch then
+      table.insert(clone_cmd, 5, "--branch")
+      table.insert(clone_cmd, 6, plugin.branch)
+    end
+    vim.fn.system(clone_cmd)
   end
 end
 
@@ -95,15 +101,21 @@ local function update_plugins()
   for _, plugin in ipairs(plugins) do
     local name = plugin.name or plugin.repo:match(".*/(.*)")
     local path = install_path .. name
+    local update_cmd = plugin.branch and string.format([[
+        git -C "%s" fetch origin "%s:refs/remotes/origin/%s" --depth=1
+        git -C "%s" checkout -B "%s" "origin/%s"
+        git -C "%s" branch --set-upstream-to="origin/%s" "%s"
+        git -C "%s" pull --ff-only
+      ]], path, plugin.branch, plugin.branch, path, plugin.branch, plugin.branch, path, plugin.branch, plugin.branch, path) or string.format('git -C "%s" pull --ff-only', path)
     table.insert(lines, string.format([[
       if [ -d "%s" ]; then
         echo "🔄  updating %s ..."
-        git -C "%s" pull --ff-only
+        %s
       else
         echo "🌱  cloning  %s ..."
-        git clone --depth 1 https://github.com/%s "%s"
+        git clone --depth 1 %s https://github.com/%s "%s"
       fi
-      ]], path, name, path, name, plugin.repo, path))
+      ]], path, name, update_cmd, name, plugin.branch and ("--branch " .. plugin.branch) or "", plugin.repo, path))
   end
   table.insert(lines, 'echo "✅  all plugins up-to-date!"')
 

@@ -17,7 +17,9 @@ local function on_attach(client, bufnr)
   local map = function(mode, lhs, rhs) vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, silent = true }) end
   map('n', 'gd', vim.lsp.buf.definition)
   map('n', 'K',  vim.lsp.buf.hover)
-  map('n', '<leader>f', function() vim.lsp.buf.format({ async = true }) end)
+  map('n', 'gr', vim.lsp.buf.references)
+  map('n', '<leader>ca', vim.lsp.buf.code_action)
+  map('n', '<leader>rn', vim.lsp.buf.rename)
 end
 
 -- cmp-nvim-lsp capabilities 그대로
@@ -43,5 +45,24 @@ vim.lsp.config('clangd', {
   filetypes = { "c", "cpp", "objc", "objcpp" },
 })
 
--- 활성화
-vim.lsp.enable('clangd')
+vim.lsp.config('pyright', {
+  on_attach = on_attach,
+  capabilities = capabilities,
+})
+
+vim.lsp.config('dockerls', {
+  on_attach = on_attach,
+  capabilities = capabilities,
+})
+
+vim.lsp.config('jsonls', {
+  on_attach = on_attach,
+  capabilities = capabilities,
+})
+
+vim.lsp.config('yamlls', {
+  on_attach = on_attach,
+  capabilities = capabilities,
+})
+
+vim.lsp.enable({ 'clangd', 'pyright', 'dockerls', 'jsonls', 'yamlls' })

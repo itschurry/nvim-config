@@ -11,7 +11,6 @@ cmp.setup({
     ["<S-Tab>"]   = cmp.mapping.select_prev_item(),
   }),
   sources = {
-    { name = "copilot"  },
     { name = "nvim_lsp" },
     { name = "luasnip"  },
     { name = "buffer"   },

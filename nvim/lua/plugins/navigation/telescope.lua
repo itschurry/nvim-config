@@ -14,9 +14,13 @@ telescope.setup({
 -- Telescope 명령어에 키맵 연결
 local map = vim.keymap.set
 map("n", "<leader>ff", "<cmd>Telescope find_files<CR>", { silent = true })
+map("n", "<leader>fF", "<cmd>Telescope git_files<CR>", { silent = true })
 map("n", "<leader>fg", "<cmd>Telescope live_grep<CR>", { silent = true })
 map("n", "<leader>fb", "<cmd>Telescope buffers<CR>",   { silent = true })
 map("n", "<leader>fh", "<cmd>Telescope help_tags<CR>", { silent = true })
+map("n", "<leader>fo", "<cmd>Telescope oldfiles<CR>", { silent = true })
+map("n", "<leader>fs", "<cmd>Telescope lsp_document_symbols<CR>", { silent = true })
+map("n", "<leader>fr", "<cmd>Telescope lsp_references<CR>", { silent = true })
 -- vim.api.nvim_set_keymap('n', '<leader>ff', '<Cmd>Telescope find_files<CR>', { noremap = true, silent = true })
 -- vim.api.nvim_set_keymap('n', '<leader>fg', '<Cmd>Telescope live_grep<CR>', { noremap = true, silent = true })
 -- vim.api.nvim_set_keymap('n', '<leader>fb', '<Cmd>Telescope buffers<CR>', { noremap = true, silent = true })

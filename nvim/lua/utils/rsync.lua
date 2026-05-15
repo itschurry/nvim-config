@@ -1,86 +1,95 @@
--- ⚙️   Rsync helper utilities for FARMILY robots
+local term = require("utils.terminal")
 
-local term = require("utils.terminal")  -- ⬅️ popup terminal 유틸
+local DEFAULT_CONFIG = ".nvim-rsync.lua"
 
--------------------------------------------------
--- 1. 파일·디렉터리 제외 목록 -------------------
--------------------------------------------------
-local exclude = {
-  ".git", ".DS_Store", ".idea", ".vscode",
-  "build/", "devel/", "log/", "logs/",
-  "*.log", "cache/"
-}
-
-local function build_exclude_opts()
-  return table.concat(
-    vim.tbl_map(function(item) return (' --exclude="%s"'):format(item) end, exclude),
-    ""
-  )
+local function config_path()
+  return vim.g.rsync_config_path or (vim.fn.getcwd() .. "/" .. DEFAULT_CONFIG)
 end
 
--------------------------------------------------
--- 2. Rsync 커맨드 생성 --------------------------
--------------------------------------------------
-local LOCAL_BASE  = "~/catkin_ws/src/"
-local REMOTE_BASE = "rdv@192.168.50.2:/home/rdv/ms_amr/"
+local function trim_slash(value)
+  return value:gsub("/+$", "")
+end
+
+local function join(base, subpath)
+  base = trim_slash(base)
+  if not subpath or subpath == "" then
+    return base .. "/"
+  end
+  return base .. "/" .. subpath:gsub("^/+", ""):gsub("/+$", "") .. "/"
+end
+
+local function load_config()
+  local path = config_path()
+  assert(vim.fn.filereadable(path) == 1, "Rsync config not found: " .. path)
+
+  local config = dofile(path)
+  assert(type(config) == "table", "Rsync config must return a table: " .. path)
+  assert(type(config.local_base) == "string" and config.local_base ~= "", "Rsync config needs local_base")
+  assert(type(config.remote_base) == "string" and config.remote_base ~= "", "Rsync config needs remote_base")
+  assert(type(config.exclude) == "table", "Rsync config needs exclude")
+  assert(type(config.flags) == "table", "Rsync config needs flags")
+
+  return {
+    local_base = vim.fn.expand(config.local_base),
+    remote_base = config.remote_base,
+    exclude = config.exclude,
+    flags = config.flags,
+  }
+end
+
+local function shell_join(args)
+  return table.concat(vim.tbl_map(vim.fn.shellescape, args), " ")
+end
+
+local function build_command(direction, subpath)
+  local config = load_config()
+  local from = direction == "up" and join(config.local_base, subpath) or join(config.remote_base, subpath)
+  local to = direction == "up" and join(config.remote_base, subpath) or join(config.local_base, subpath)
+  local args = { "rsync" }
+
+  vim.list_extend(args, config.flags)
+  for _, item in ipairs(config.exclude) do
+    table.insert(args, "--exclude=" .. item)
+  end
+  table.insert(args, from)
+  table.insert(args, to)
+
+  return shell_join(args)
+end
 
 local function rsync(direction, subpath)
-  local from, to
-  local suffix = subpath and (subpath .. "/") or ""
-
-  if direction == "up" then
-    from = LOCAL_BASE .. suffix
-    to   = REMOTE_BASE .. suffix
-  else
-    from = REMOTE_BASE .. suffix
-    to   = LOCAL_BASE .. suffix
-  end
-
-  local cmd = ("rsync -avz --progress%s %s %s"):format(
-    build_exclude_opts(), from, to
-  )
-
-  term.run_in_popup_terminal(cmd) -- 💥 popup 터미널로 실행
+  term.run_in_popup_terminal(build_command(direction, subpath))
 end
 
--------------------------------------------------
--- 3. User Command 정의 --------------------------
--------------------------------------------------
 vim.api.nvim_create_user_command("RsyncUp", function(opts)
-  rsync("up", opts.args ~= "" and opts.args or nil)
+  rsync("up", opts.args)
 end, {
   nargs = "?",
-  desc = "Rsync ⬆︎ local → remote [optional path]",
-  complete = "dir"
+  desc = "Rsync local to remote from .nvim-rsync.lua",
+  complete = "dir",
 })
 
 vim.api.nvim_create_user_command("RsyncDown", function(opts)
-  rsync("down", opts.args ~= "" and opts.args or nil)
+  rsync("down", opts.args)
 end, {
   nargs = "?",
-  desc = "Rsync ⬇︎ remote → local [optional path]",
-  complete = "file"
+  desc = "Rsync remote to local from .nvim-rsync.lua",
+  complete = "file",
 })
 
--------------------------------------------------
--- 4. 실행 전 확인 프롬프트 ----------------------
--------------------------------------------------
 local function confirm_rsync(direction)
-  local sub = vim.fn.input("Subfolder to sync (empty = all): ")
-  local path = sub ~= "" and sub or nil
-  local choice = vim.fn.input(("Rsync %s %s ? (Y/n): "):format(direction, sub))
+  local subpath = vim.fn.input("Subpath to sync (empty = all): ")
+  local label = subpath ~= "" and subpath or "all"
+  local choice = vim.fn.input(("Rsync %s %s ? (Y/n): "):format(direction, label))
   if choice == "" or choice:lower() == "y" then
-    rsync(direction, path)
-  else
-    vim.notify("Rsync canceled", vim.log.levels.INFO)
+    rsync(direction, subpath)
   end
 end
 
--------------------------------------------------
--- 5. 키매핑 -------------------------------------
--------------------------------------------------
-local map = vim.keymap.set
-map("n", "<leader>ru", function() confirm_rsync("up") end,
-  { silent = true, desc = "Rsync UP  (local → remote)" })
-map("n", "<leader>rd", function() confirm_rsync("down") end,
-  { silent = true, desc = "Rsync DOWN (remote → local)" })
+vim.keymap.set("n", "<leader>ru", function()
+  confirm_rsync("up")
+end, { silent = true, desc = "Rsync up" })
+
+vim.keymap.set("n", "<leader>rd", function()
+  confirm_rsync("down")
+end, { silent = true, desc = "Rsync down" })

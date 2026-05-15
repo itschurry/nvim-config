@@ -1,11 +1,8 @@
 -- UI 관련 설정
--- colorscheme 설정
-vim.cmd("colorscheme github_dark_colorblind")
-
 -- NvimTree
 require("nvim-tree").setup {
     view = {
-        width = 60,          -- 탐색기 너비 설정
+        width = 80,          -- 탐색기 너비 설정
         side = "right",       -- 탐색기 위치 (left, right)
     },
     filters = {
@@ -44,7 +41,6 @@ vim.keymap.set("n", "<C-t>", ":AerialToggle<CR>", { silent = true })
 -- Lualine
 require('lualine').setup {
     options = {
-        theme = 'papercolor_dark',
         theme = 'palenight',
         section_separators = {'', ''},  -- 섹션 구분 기호
         component_separators = {'', ''}  -- 컴포넌트 구분 기호
@@ -138,6 +134,20 @@ require("Comment").setup({
   }
 })
 
+vim.keymap.set("n", "<leader>/", require("Comment.api").toggle.linewise.current, { desc = "Toggle line comment" })
+vim.keymap.set("v", "<leader>/", function()
+  local esc = vim.api.nvim_replace_termcodes("<ESC>", true, false, true)
+  vim.api.nvim_feedkeys(esc, "x", false)
+  require("Comment.api").toggle.linewise(vim.fn.visualmode())
+end, { desc = "Visual toggle line comment" })
+
+vim.keymap.set("n", "<M-/>", require("Comment.api").toggle.blockwise.current, { desc = "Toggle block comment" })
+vim.keymap.set("v", "<M-/>", function()
+  local esc = vim.api.nvim_replace_termcodes("<ESC>", true, false, true)
+  vim.api.nvim_feedkeys(esc, "x", false)
+  require("Comment.api").toggle.blockwise(vim.fn.visualmode())
+end, { desc = "Visual toggle block comment" })
+
 -- notify
 local colors = require("catppuccin.palettes").get_palette("mocha")
 local bg = vim.api.nvim_get_hl_by_name("Normal", true).background
@@ -146,20 +156,6 @@ require("notify").setup({
 --   background_colour = "#1e1e2e", -- Catppuccin Mocha 테마와 어울리는 어두운 색
   -- background_colour = colors.base,
   background_colour = string.format("#%06x", bg or 0x000000)
-})
-
-require("edgy").setup({
-  bottom = {
-    { ft = "toggleterm", size = 15 },
-    { ft = "qf", title = "QuickFix" },
-  },
-  left = {
-    { ft = "aerial", title = "Outline" },
-    { ft = "CopilotChat", title = "Copilot" },
-  },
-  right = {
-    { ft = "NvimTree", title = "Explorer" },
-  },
 })
 
 require("twilight").setup()

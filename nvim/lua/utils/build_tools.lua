@@ -1,7 +1,8 @@
--- ~/.config/nvim/lua/plugins/build_tools.lua
+-- ~/.config/nvim/lua/utils/build_tools.lua
 -- local term = require("utils.terminal")
 
-vim.g.build_tool = "catkin"            -- 필요할 때 "colcon" 으로 토글
+vim.g.build_tool = vim.g.build_tool or "catkin"            -- 필요할 때 "colcon" 으로 토글
+assert(vim.g.build_tool == "catkin" or vim.g.build_tool == "colcon", "build_tool must be catkin or colcon")
 
 ----------------------------------------------------------------------
 -- 명령 문자열 빌더 (패키지 선택 지원)
@@ -34,20 +35,32 @@ local function clean_cmd(pkg)
   end
 end
 
-local function show_terminal_log(cmd)
-  local buf = vim.api.nvim_create_buf(false, true)
-  local win = vim.api.nvim_open_win(buf, true, {
-    relative = "editor",
-    width = math.floor(vim.o.columns * 0.7),
-    height = math.floor(vim.o.lines * 0.5),
-    row = math.floor(vim.o.lines * 0.25),
-    col = math.floor(vim.o.columns * 0.15),
-    border = "single",
-    style = "minimal"
-  })
+local function run_quickfix_job(cmd, label)
+  local lines = {}
 
-  vim.fn.termopen(cmd)
-  vim.cmd("startinsert")
+  vim.fn.jobstart(cmd, {
+    stdout_buffered = true,
+    stderr_buffered = true,
+    on_stdout = function(_, data)
+      vim.list_extend(lines, vim.tbl_filter(function(line) return line ~= "" end, data))
+    end,
+    on_stderr = function(_, data)
+      vim.list_extend(lines, vim.tbl_filter(function(line) return line ~= "" end, data))
+    end,
+    on_exit = function(_, code)
+      vim.fn.setqflist({}, "r", {
+        title = label,
+        lines = lines,
+      })
+      if code == 0 then
+        vim.cmd("cclose")
+        vim.notify(label .. " succeeded", vim.log.levels.INFO)
+      else
+        vim.cmd("copen")
+        vim.notify(label .. " failed", vim.log.levels.ERROR)
+      end
+    end,
+  })
 end
 ----------------------------------------------------------------------
 -- 공통 프롬프트 → 확인 → 실행 함수
@@ -60,8 +73,8 @@ local function confirm_and_run(kind)   -- kind = "build" | "clean"
 
   local ok = vim.fn.input(label .. " " .. (pkg ~= "" and pkg or "all") .. " ? (Y/n): ")
   if ok == "" or ok:lower() == "y" then
-    vim.notify("🚧 Build started: " .. cmd, vim.log.levels.INFO)
-    show_terminal_log(cmd)  -- log를 popup으로 보여줌
+    vim.notify(label .. " started: " .. cmd, vim.log.levels.INFO)
+    run_quickfix_job(cmd, label)
   else
     vim.notify(label .. " canceled", vim.log.levels.INFO)
   end
